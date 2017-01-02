@@ -1,0 +1,86 @@
+<html>
+  <head>
+    <style>
+      .node {
+        fill: papayawhip;
+        stroke: #000;
+        stroke-width: 2px;
+      }
+
+      path.link {
+        stroke: #000;
+        stroke-width: 2px;
+        fill: none;
+      }
+    </style>
+  <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  </head>
+  <body></body>
+  <script>
+    const width = 1000,
+        height = 900;
+
+    const nodes = [
+      { job: 'Doctor'},
+      { job: 'Software Engineer'},
+      { job: 'Teacher' }
+    ];
+
+
+    const links = [
+      { source: 0, target: 1 },
+      { source: 1, target: 2 },
+      { source: 2, target: 0 },
+    ];
+
+    function tick() {
+      node.attr('cx', function(d) { return d.x; })
+          .attr('cy', function(d) { return d.y; })
+          .call(force.drag);
+
+      path.attr('d', function(d, i) {
+
+        // barnes-hut algo
+        const dx = d.target.x - d.source.x,
+              dy = d.target.y - d.source.y,
+              dr = Math.sqrt(dx * dx + dy * dy);
+
+              return `M
+                ${d.source.x},
+                ${d.source.y}A
+                ${dr},${dr} 0 0,1
+                ${d.target.x},
+                ${d.target.y}`;
+
+      })
+    }
+
+    const svg = d3.select('body').append('svg')
+          .attr('width', width)
+          .attr('height', height);
+
+    const node = svg.selectAll('.node')
+          .data(nodes)
+          .enter().append('circle')
+          .attr('class', 'node')
+          .attr('cx', function(d,i) { return (i + 1) * (width / 4); })
+          .attr('cy', function(d,i) { return height / 2; })
+          .attr('r', width * 0.03) // how large the circle is
+
+    const path = svg.append('svg:g').selectAll('path')
+          .data(links)
+          .enter().append('svg:path')
+          .attr('class', 'link')
+
+    const force = d3.layout.force()
+          .size([width, height])
+          .nodes(nodes)
+          .links(links)
+          .on('tick', tick)
+          .linkDistance(width / 2)
+          .start();
+
+
+
+  </script>
+</html>
